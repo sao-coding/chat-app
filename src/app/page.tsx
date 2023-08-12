@@ -3,9 +3,11 @@
 import { useSignInWithGoogle } from "react-firebase-hooks/auth"
 import { auth } from "@/lib/firebase/app"
 import { IconBrandGoogle } from "@tabler/icons-react"
+import { useRouter } from "next/navigation"
 
 const HomePage = () => {
     const [signInWithGoogle, user, loading, error] = useSignInWithGoogle(auth)
+    const router = useRouter()
 
     if (error) {
         return (
@@ -18,11 +20,7 @@ const HomePage = () => {
         return <p>Loading...</p>
     }
     if (user) {
-        return (
-            <div>
-                <p>Signed In User: {user.user.email}</p>
-            </div>
-        )
+        router.push("/chat")
     }
     return (
         <div className='flex items-center justify-center h-full'>
