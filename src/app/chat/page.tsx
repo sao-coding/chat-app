@@ -14,7 +14,7 @@ const ChatPage = () => {
     const [user, loading, error] = useAuthState(auth)
     const [signOut] = useSignOut(auth)
     const [messages, setMessages] = useState<Message[]>([])
-    const scroll = useRef(null)
+    const scroll = useRef<HTMLDivElement | null>(null)
     const router = useRouter()
 
     useEffect(() => {
@@ -23,6 +23,12 @@ const ChatPage = () => {
             router.push("/")
         }
     }, [user])
+
+    useEffect(() => {
+        if (scroll.current) {
+            scroll.current.scrollIntoView({ behavior: "smooth" })
+        }
+    }, [messages])
 
     useEffect(() => {
         const q = query(collection(db, "messages"), orderBy("timestamp", "asc"), limit(50))

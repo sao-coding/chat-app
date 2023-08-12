@@ -33,8 +33,8 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
                 await addDoc(collection(db, "messages"), data)
                 messageRef.current.value = ""
                 setChanges(1)
-                // 偵測捲軸自動捲到底部
-                scroll.current.scrollIntoView({ behavior: "smooth" })
+                // // 偵測捲軸自動捲到底部
+                // scroll.current.scrollIntoView({ behavior: "smooth" })
             } catch (error) {
                 console.log(error)
             }
