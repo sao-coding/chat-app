@@ -19,23 +19,16 @@ const ChatPage = () => {
 
     useEffect(() => {
         // 驗證是否登入
-        if (!user) {
+        if (!user && !loading) {
             router.push("/")
         }
     }, [user])
-
-    useEffect(() => {
-        if (scroll.current) {
-            scroll.current.scrollIntoView({ behavior: "smooth" })
-        }
-    }, [messages])
 
     useEffect(() => {
         const q = query(collection(db, "messages"), orderBy("timestamp", "asc"), limit(50))
         const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
             const fetchedMessages: Message[] = []
             QuerySnapshot.forEach((doc) => {
-                console.log(doc.data())
                 fetchedMessages.push({ id: doc.id, ...doc.data() } as Message)
             })
             // const sortedMessages = fetchedMessages.sort(
@@ -47,8 +40,10 @@ const ChatPage = () => {
     }, [])
 
     useEffect(() => {
-        console.log(user)
-    }, [user])
+        if (scroll.current) {
+            scroll.current.scrollIntoView({ behavior: "smooth" })
+        }
+    }, [messages])
 
     return (
         <>
