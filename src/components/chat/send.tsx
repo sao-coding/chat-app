@@ -14,7 +14,6 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
     const [changes, setChanges] = useState(1)
     const messageRef = useRef<HTMLTextAreaElement | null>(null)
     const sendMessage = async () => {
-        console.log("送出訊息", messageRef.current?.value)
         if (messageRef.current) {
             if (messageRef.current.value === "") return
             const { uid, displayName, photoURL, email } = user
