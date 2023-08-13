@@ -43,4 +43,6 @@ const Message = React.forwardRef<HTMLDivElement, { user: User; message: Message 
     }
 )
 
+Message.displayName = "Message"
+
 export default Message
