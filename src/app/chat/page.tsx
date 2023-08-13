@@ -1,24 +1,37 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { use, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useAuthState, useSignOut } from "react-firebase-hooks/auth"
 import { auth } from "@/lib/firebase/app"
-import { query, collection, orderBy, onSnapshot, startAfter, limit } from "firebase/firestore"
+import {
+    query,
+    collection,
+    getDocs,
+    orderBy,
+    onSnapshot,
+    startAfter,
+    limit,
+} from "firebase/firestore"
 import { db } from "@/lib/firebase/app"
 import { useInView } from "react-intersection-observer"
 import MessageCP from "@/components/chat/message"
 import SendCP from "@/components/chat/send"
+import LoadingCP from "@/components/chat/loading"
 import { Message } from "@/types"
 
 const ChatPage = () => {
     const [user, loading, error] = useAuthState(auth)
     const [signOut] = useSignOut(auth)
     const [messages, setMessages] = useState<Message[]>([])
-    const [lastMessageId, setLastMessageId] = useState<string | undefined>(undefined)
-    const scroll = useRef<HTMLDivElement | null>(null)
+    const [noMore, setNoMore] = useState(false)
+    const { ref, inView } = useInView({
+        delay: 800,
+    })
+    const containerRef = useRef<HTMLDivElement>(null)
+    const [lastMessageId, setLastMessageId] = useState<string | null>(null)
     const router = useRouter()
-    const { ref, inView } = useInView()
+    const [isMouseDown, setIsMouseDown] = useState(false)
 
     useEffect(() => {
         // 驗證是否登入
@@ -28,65 +41,77 @@ const ChatPage = () => {
     }, [user, loading])
 
     useEffect(() => {
-        const fetchMessages = (id?: string) => {
-            // const q = query(
-            //     collection(db, "messages"),
-            //     orderBy("timestamp", "desc"),
-            //     startAt(id),
-            //     limit(10)
-            // )
-            let q
-            if (id) {
-                console.log("id", id)
-                q = query(
-                    collection(db, "messages"),
-                    orderBy("timestamp", "desc"),
-                    startAfter(id),
-                    limit(10)
-                )
-            } else {
-                q = query(collection(db, "messages"), orderBy("timestamp", "desc"), limit(50))
-            }
+        const q = query(collection(db, "messages"), orderBy("timestamp", "desc"), limit(10))
 
-            const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
-                console.log("及時更新")
-                const fetchedMessages: Message[] = []
+        const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
+            setMessages((currentMessages) => {
+                const data: Message[] = []
                 QuerySnapshot.forEach((doc) => {
-                    fetchedMessages.push({ id: doc.id, ...doc.data() } as Message)
-                })
-                const sortedMessages = fetchedMessages.sort(
-                    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-                )
-                // setMessages((messages) => [...sortedMessages, ...messages])
-                setMessages(sortedMessages)
-                if (!id) setLastMessageId(messages[messages.length - 1]?.id)
-            })
+                    const messageData = {
+                        id: doc.id,
+                        ...doc.data(),
+                    } as Message
+                    // const sortedMessages = fetchedMessages.sort(
+                    //     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+                    // )
 
-            return () => unsubscribe()
-        }
-        fetchMessages()
+                    const existingMessage = currentMessages.find(
+                        (message) => message.id === messageData.id
+                    )
+
+                    if (!existingMessage) {
+                        data.push(messageData)
+                    }
+                })
+
+                setLastMessageId(data[data.length - 1]?.id ?? null)
+
+                return [...data, ...currentMessages]
+            })
+        })
+        return () => unsubscribe()
     }, [])
 
     useEffect(() => {
-        // 如果有新訊息就滾動到最下面
-        // 取得最後一筆訊息的 id
-        console.log("messages", messages)
-        // const lastMessageId = messages[messages.length - 1]?.id
-        console.log("lastMessageId", lastMessageId)
-        if (scroll.current) {
-            scroll.current.scrollIntoView({ behavior: "smooth" })
+        if (inView) {
+            console.log("inView", messages[messages.length - 1].timestamp)
+            const getMore = async () => {
+                const q = query(
+                    collection(db, "messages"),
+                    orderBy("timestamp", "desc"),
+                    startAfter(messages[messages.length - 1].timestamp),
+                    limit(10)
+                )
+
+                const data = await getDocs(q)
+
+                const oldMessages: Message[] = []
+
+                data.forEach((doc) => {
+                    oldMessages.push({
+                        id: doc.id,
+                        ...doc.data(),
+                    } as Message)
+                })
+
+                setMessages((currentMessages) => [...currentMessages, ...oldMessages])
+                console.log("oldMessages", oldMessages)
+                if (oldMessages.length === 0) {
+                    setNoMore(true)
+                }
+            }
+
+            !isMouseDown && getMore()
         }
-    }, [messages])
+    }, [inView, isMouseDown])
 
     useEffect(() => {
-        if (inView) {
-            console.log("inView")
-            // 取得最後一筆訊息的 timestamp
-            const lastMessageTimestamp = messages[0].timestamp
-            console.log(lastMessageTimestamp)
-            // fetchMessages(lastMessageTimestamp)
-        }
-    }, [inView])
+        // 到底部
+        containerRef.current?.scrollTo({
+            top: 0,
+            behavior: "smooth",
+        })
+    }, [lastMessageId])
 
     return (
         <>
@@ -102,9 +127,14 @@ const ChatPage = () => {
                                     登出
                                 </button>
                             </div>
-                            <div className='h-[90vh] overflow-y-scroll px-2'>
+                            <div
+                                className='h-[90vh] overflow-y-scroll px-2 flex flex-col-reverse'
+                                ref={containerRef}
+                                onMouseDown={() => setIsMouseDown(true)}
+                                onMouseUp={() => setIsMouseDown(false)}
+                            >
                                 {messages.map((message, i) => {
-                                    if (i === 0) {
+                                    if (messages.length === i + 1) {
                                         return (
                                             <MessageCP
                                                 ref={ref}
@@ -118,7 +148,10 @@ const ChatPage = () => {
                                         <MessageCP key={message.id} user={user} message={message} />
                                     )
                                 })}
-                                <span ref={scroll}></span>
+                                {!noMore &&
+                                    Array.from(Array(6).keys()).map((index) => (
+                                        <LoadingCP key={index} index={index} />
+                                    ))}
                             </div>
 
                             <div className='w-full h-[10vh] flex flex-col justify-end'>

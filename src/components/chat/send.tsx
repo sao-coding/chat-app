@@ -1,5 +1,6 @@
 import { useState, useRef } from "react"
 import { IconSend, IconMicrophone, IconUser } from "@tabler/icons-react"
+import clsx from "clsx"
 import { db } from "@/lib/firebase/app"
 import { addDoc, collection, serverTimestamp } from "firebase/firestore"
 import { User } from "firebase/auth"
@@ -80,7 +81,10 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
         }
         if (window.innerWidth < 768) {
             if (event.key === "Enter") {
-                scroll.current.scrollIntoView({ behavior: "smooth" })
+                scroll.current?.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                })
                 if (changes > 2) return
                 setChanges(changes + 1)
             }
@@ -89,7 +93,10 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
                 event.preventDefault()
                 sendMessage()
             } else if (event.key === "Enter" && event.shiftKey) {
-                scroll.current.scrollIntoView({ behavior: "smooth" })
+                scroll.current?.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                })
                 if (changes > 2) return
                 setChanges(changes + 1)
             }
@@ -109,24 +116,25 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
                 </div>
             </div>
             <textarea
-                className='w-4/6 p-2 border rounded-md h-full'
+                // className='w-4/6 py-2 px-3 border rounded-full h-full'
+                className={clsx(
+                    "w-4/6 py-2 px-3 border h-full focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-transparent",
+                    changes === 1 && "rounded-full",
+                    changes > 1 && "rounded-xl"
+                )}
                 rows={changes}
                 ref={messageRef}
                 onKeyDown={handleKeyDown}
             />
-            <button
-                className='text-white bg-sky-700 p-2 rounded-md hover:bg-sky-500 h-full mx-1'
-                onClick={sendMessage}
-            >
-                <IconSend size={25} />
-            </button>
-            {/* 語音輸入 */}
-            <button
-                className='text-white bg-sky-700 p-2 rounded-md hover:bg-sky-500 h-full'
-                onClick={voiceInput}
-            >
-                <IconMicrophone size={25} />
-            </button>
+            <div className='flex items-center'>
+                <button className='p-2 rounded-md h-full mx-1' onClick={sendMessage}>
+                    <IconSend size={25} />
+                </button>
+                {/* 語音輸入 */}
+                <button className='p-2 rounded-md h-full' onClick={voiceInput}>
+                    <IconMicrophone size={25} />
+                </button>
+            </div>
         </>
         // </div>
     )
