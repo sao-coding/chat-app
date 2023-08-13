@@ -106,8 +106,8 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
     return (
         // <div className='flex justify-between'>
         <>
-            <div className='flex items-center justify-center'>
-                <div className='w-10 h-10 bg-orange-900 rounded-full flex items-center justify-center mr-1'>
+            <div className='flex items-center justify-center mr-2'>
+                <div className='w-10 h-10 bg-orange-900 rounded-full flex items-center justify-center'>
                     {user?.photoURL ? (
                         <img className='rounded-full' src={user?.photoURL} alt='' />
                     ) : (
@@ -127,7 +127,7 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
                 onKeyDown={handleKeyDown}
             />
             <div className='flex items-center'>
-                <button className='p-2 rounded-md h-full mx-1' onClick={sendMessage}>
+                <button className='p-2 rounded-md h-full' onClick={sendMessage}>
                     <IconSend size={25} />
                 </button>
                 {/* 語音輸入 */}
