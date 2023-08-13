@@ -37,7 +37,7 @@ const Message = React.forwardRef<HTMLDivElement, { user: User; message: Message 
                 <div className='text-xs gary-400'>
                     {message.timestamp ? formatDateTime(message.timestamp) : ""}
                 </div>
-                <div className='text-xs gary-400'>{message.id}</div>
+                <div className='text-xs gary-400 hidden'>{message.id}</div>
             </div>
         )
     }
