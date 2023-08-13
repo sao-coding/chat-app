@@ -99,12 +99,14 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
     return (
         // <div className='flex justify-between'>
         <>
-            <div className='w-10 h-10 bg-orange-900 rounded-full flex items-center justify-center mr-1'>
-                {user?.photoURL ? (
-                    <img className='rounded-full' src={user?.photoURL} alt='' />
-                ) : (
-                    <IconUser size={24} />
-                )}
+            <div className='flex items-center justify-center'>
+                <div className='w-10 h-10 bg-orange-900 rounded-full flex items-center justify-center mr-1'>
+                    {user?.photoURL ? (
+                        <img className='rounded-full' src={user?.photoURL} alt='' />
+                    ) : (
+                        <IconUser size={24} />
+                    )}
+                </div>
             </div>
             <textarea
                 className='w-4/6 p-2 border rounded-md h-full'
