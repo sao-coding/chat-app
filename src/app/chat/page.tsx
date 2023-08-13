@@ -161,6 +161,10 @@ const ChatPage = () => {
                                     <Link href='https://github.com/sao-coding' target='_blank'>
                                         {" 唯一 "}
                                     </Link>
+                                    &
+                                    <Link href='https://github.com/tszhong0411' target='_blank'>
+                                        {" Hong "}
+                                    </Link>
                                     &copy; 2023
                                 </div>
                                 <div className='flex justify-between items-end bg-slate-100 py-2 px-4'>
