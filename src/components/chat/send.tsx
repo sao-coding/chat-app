@@ -1,6 +1,6 @@
 import { useState, useRef } from "react"
-import { IconSend, IconMicrophone } from "@tabler/icons-react"
-import { auth, db } from "@/lib/firebase/app"
+import { IconSend, IconMicrophone, IconUser } from "@tabler/icons-react"
+import { db } from "@/lib/firebase/app"
 import { addDoc, collection, serverTimestamp } from "firebase/firestore"
 import { User } from "firebase/auth"
 // 卷軸 type
@@ -99,8 +99,15 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
     return (
         // <div className='flex justify-between'>
         <>
+            <div className='w-10 h-10 bg-orange-900 rounded-full flex items-center justify-center mr-1'>
+                {user?.photoURL ? (
+                    <img className='rounded-full' src={user?.photoURL} alt='' />
+                ) : (
+                    <IconUser size={24} />
+                )}
+            </div>
             <textarea
-                className='w-4/5 p-2 border rounded-md h-full'
+                className='w-4/6 p-2 border rounded-md h-full'
                 rows={changes}
                 ref={messageRef}
                 onKeyDown={handleKeyDown}

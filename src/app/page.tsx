@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { useSignInWithGoogle } from "react-firebase-hooks/auth"
 import { auth } from "@/lib/firebase/app"
 import { IconBrandGoogle } from "@tabler/icons-react"
@@ -9,19 +10,12 @@ const HomePage = () => {
     const [signInWithGoogle, user, loading, error] = useSignInWithGoogle(auth)
     const router = useRouter()
 
-    if (error) {
-        return (
-            <div>
-                <p>Error: {error.message}</p>
-            </div>
-        )
-    }
-    if (loading) {
-        return <p>Loading...</p>
-    }
-    if (user) {
-        router.push("/chat")
-    }
+    useEffect(() => {
+        if (user) {
+            router.push("/chat")
+        }
+    }, [user, loading, error])
+
     return (
         <div className='flex items-center justify-center h-full'>
             <div className='bg-white shadow-md rounded-md p-2'>
