@@ -37,7 +37,7 @@ const Message = React.forwardRef<HTMLDivElement, { user: User; message: Message 
                         )}
                     </div>
                 </div>
-                <div className='border rounded-2xl bg-white p-2 max-w-xl break-words whitespace-pre-line'>
+                <div className='border rounded-2xl bg-white px-2 py-1 max-w-xl break-words whitespace-pre-line'>
                     {message.content}
                 </div>
                 <div className='text-xs gary-400'>
