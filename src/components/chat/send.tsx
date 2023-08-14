@@ -158,21 +158,6 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
                     vibrate: [200, 100, 200, 100, 200, 100, 200],
                     tag: "notification",
                     renotify: true,
-                    data: {
-                        url: window.location.href,
-                    },
-                    actions: [
-                        {
-                            action: "open",
-                            title: "開啟",
-                            icon: "/icons/icon-192x192.png",
-                        },
-                        {
-                            action: "close",
-                            title: "關閉",
-                            icon: "/icons/icon-192x192.png",
-                        },
-                    ],
                 })
             })
 
