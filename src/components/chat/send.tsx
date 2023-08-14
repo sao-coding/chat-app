@@ -283,7 +283,8 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
             />
             <div className='flex items-center'>
                 <button className='p-2 rounded-md h-full' onClick={sendMessage}>
-                    <IconSend size={25} />
+                    {/* 旋轉 icon 45 度 */}
+                    <IconSend size={25} className='transform rotate-45' />
                 </button>
                 {/* 語音輸入 */}
                 <button className='p-2 rounded-md h-full' onClick={voiceInput}>

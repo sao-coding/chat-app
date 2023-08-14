@@ -69,19 +69,41 @@ const ChatPage = () => {
                                 console.log(
                                     "Notification user email",
                                     messageData.author.email,
-                                    user?.email,
+                                    user?.email
+                                )
+                                console.log(
+                                    "Notification permission",
                                     localStorage.getItem("notification")
                                 )
-                                console.log("Notification permission")
                                 if (
                                     Notification.permission === "granted" &&
                                     messageData.author.email !== user?.email &&
                                     !fristLoadRef.current &&
                                     localStorage.getItem("notification") === "true"
                                 ) {
-                                    new Notification(messageData.author.username, {
-                                        body: messageData.content,
-                                        icon: messageData.author.avatar,
+                                    navigator.serviceWorker.ready.then((registration) => {
+                                        registration.showNotification(messageData.author.username, {
+                                            body: messageData.content,
+                                            icon: messageData.author.avatar,
+                                            vibrate: [200, 100, 200, 100, 200, 100, 200],
+                                            tag: messageData.id,
+                                            renotify: true,
+                                            data: {
+                                                url: window.location.href,
+                                            },
+                                            actions: [
+                                                {
+                                                    action: "open",
+                                                    title: "開啟",
+                                                    icon: "/icons/icon-192x192.png",
+                                                },
+                                                {
+                                                    action: "close",
+                                                    title: "關閉",
+                                                    icon: "/icons/icon-192x192.png",
+                                                },
+                                            ],
+                                        })
                                     })
                                 }
                             }
