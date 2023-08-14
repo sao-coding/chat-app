@@ -151,6 +151,30 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
         if (!notification) {
             localStorage.setItem("notification", "true")
             setNotification(true)
+            navigator.serviceWorker.ready.then((registration) => {
+                registration.showNotification("通知訊息", {
+                    body: "您已開啟通知",
+                    icon: "/icons/icon-192x192.png",
+                    vibrate: [200, 100, 200, 100, 200, 100, 200],
+                    tag: "notification",
+                    renotify: true,
+                    data: {
+                        url: window.location.href,
+                    },
+                    actions: [
+                        {
+                            action: "open",
+                            title: "開啟",
+                            icon: "/icons/icon-192x192.png",
+                        },
+                        {
+                            action: "close",
+                            title: "關閉",
+                            icon: "/icons/icon-192x192.png",
+                        },
+                    ],
+                })
+            })
 
             // 註冊通知
             // 是否允許瀏覽器通知
