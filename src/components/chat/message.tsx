@@ -22,14 +22,20 @@ const Message = React.forwardRef<HTMLDivElement, { user: User; message: Message 
             >
                 <div className='flex items-center px-1 py-1'>
                     <div className='w-6 h-6 bg-orange-300 rounded-full flex items-center justify-center'>
-                        {message.author?.avatar ? (
+                        {message.author?.avatar && message.author?.anonymous === false ? (
                             <img className='rounded-full' src={message.author.avatar} alt='' />
                         ) : (
-                            <IconUser size={24} />
+                            <IconUser size={24} className='p-1' />
                         )}
                     </div>
 
-                    <div className='ml-1'>{message.author?.username}</div>
+                    <div className='ml-1'>
+                        {message.author?.anonymous ? (
+                            <div className='text-xs text-gray-400'>匿名</div>
+                        ) : (
+                            <div className='text-xs text-gray-400'>{message.author?.username}</div>
+                        )}
+                    </div>
                 </div>
                 <div className='border rounded-2xl bg-white p-2 max-w-xl break-words whitespace-pre-line'>
                     {message.content}

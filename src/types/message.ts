@@ -4,7 +4,7 @@ export type Message = {
         avatar: string
         username: string
         email: string
-        name: string
+        anonymous: boolean
     }
     content: string
     timestamp: string
