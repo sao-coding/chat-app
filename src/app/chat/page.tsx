@@ -29,6 +29,7 @@ const ChatPage = () => {
     const { ref, inView } = useInView({
         delay: 800,
     })
+    const fristLoadRef = useRef(true)
     const containerRef = useRef<HTMLDivElement>(null)
     const [lastMessageId, setLastMessageId] = useState<string | null>(null)
     const router = useRouter()
@@ -42,36 +43,60 @@ const ChatPage = () => {
     }, [user, loading])
 
     useEffect(() => {
-        const q = query(collection(db, "messages"), orderBy("timestamp", "desc"), limit(10))
+        if (user) {
+            const q = query(collection(db, "messages"), orderBy("timestamp", "desc"), limit(10))
+            const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
+                setMessages((currentMessages) => {
+                    const data: Message[] = []
+                    QuerySnapshot.forEach((doc) => {
+                        const messageData = {
+                            id: doc.id,
+                            ...doc.data(),
+                        } as Message
+                        // const sortedMessages = fetchedMessages.sort(
+                        //     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+                        // )
 
-        const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
-            setMessages((currentMessages) => {
-                const data: Message[] = []
-                QuerySnapshot.forEach((doc) => {
-                    const messageData = {
-                        id: doc.id,
-                        ...doc.data(),
-                    } as Message
-                    // const sortedMessages = fetchedMessages.sort(
-                    //     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-                    // )
+                        const existingMessage = currentMessages.find(
+                            (message) => message.id === messageData.id
+                        )
 
-                    const existingMessage = currentMessages.find(
-                        (message) => message.id === messageData.id
-                    )
-
-                    if (!existingMessage) {
-                        data.push(messageData)
-                    }
+                        if (!existingMessage) {
+                            data.push(messageData)
+                            // 通知訊息
+                            // console.log("fristLoad#", fristLoadRef.current)
+                            if (typeof window !== "undefined" && "Notification" in window) {
+                                console.log(
+                                    "Notification user email",
+                                    messageData.author.email,
+                                    user?.email,
+                                    localStorage.getItem("notification")
+                                )
+                                console.log("Notification permission")
+                                if (
+                                    Notification.permission === "granted" &&
+                                    messageData.author.email !== user?.email &&
+                                    !fristLoadRef.current &&
+                                    localStorage.getItem("notification") === "true"
+                                ) {
+                                    new Notification(messageData.author.username, {
+                                        body: messageData.content,
+                                        icon: messageData.author.avatar,
+                                    })
+                                }
+                            }
+                        }
+                    })
+                    fristLoadRef.current = false
+                    // console.log("FristLoad", fristLoadRef.current)
+                    setLastMessageId(data[data.length - 1]?.id ?? null)
+                    return [...data, ...currentMessages]
                 })
-
-                setLastMessageId(data[data.length - 1]?.id ?? null)
-
-                return [...data, ...currentMessages]
             })
-        })
-        return () => unsubscribe()
-    }, [])
+
+            return () => unsubscribe()
+        }
+    }, [user])
 
     useEffect(() => {
         if (inView) {
