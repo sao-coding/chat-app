@@ -174,13 +174,20 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
                                 <div className='flex items-center space-x-2'>
                                     <div className=''>使用匿名</div>
                                     <Switch.Root
-                                        className='bg-black rounded-full w-10 h-6 data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-300 outline-none border'
+                                        className='bg-black rounded-full w-11 h-6 data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-300 outline-none'
                                         defaultChecked={anonymous}
                                         onCheckedChange={onAnonymous}
                                     >
-                                        <Switch.Thumb className='bg-white rounded-full h-5 w-5 block transition-transform border data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0' />
+                                        <Switch.Thumb className='bg-white rounded-full h-5 w-5 block transition-transform data-[state=checked]:translate-x-[22px] data-[state=unchecked]:translate-x-0.5' />
                                     </Switch.Root>
-                                    <div className=''>{anonymous ? "已開啟" : "已關閉"}</div>
+                                    <div
+                                        className={clsx(
+                                            "text-xs",
+                                            anonymous ? "text-green-500" : "text-red-500"
+                                        )}
+                                    >
+                                        {anonymous ? "已開啟" : "已關閉"}
+                                    </div>
                                 </div>
                                 <div className='text-xs text-gray-500'>
                                     {"註： 匿名模式下，您的大頭貼與姓名將不會顯示在聊天室"}
