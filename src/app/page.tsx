@@ -11,7 +11,7 @@ const HomePage = () => {
     const router = useRouter()
 
     useEffect(() => {
-        if (user) {
+        if (user && !loading && !error) {
             router.push("/chat")
         }
     }, [user, loading, error])
