@@ -16,9 +16,9 @@ import {
 } from "firebase/firestore"
 import { db } from "@/lib/firebase/app"
 import { useInView } from "react-intersection-observer"
-import MessageCP from "@/components/chat/message"
-import SendCP from "@/components/chat/send"
-import LoadingCP from "@/components/chat/loading"
+import MessageCP from "@/app/chat/components/message"
+import SendCP from "@/app/chat/components/send"
+import LoadingCP from "@/app/chat/components/loading"
 import { Message } from "@/types"
 
 const ChatPage = () => {
