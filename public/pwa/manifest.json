@@ -4,7 +4,7 @@
     "background_color": "#ffffff",
     "display": "standalone",
     "scope": "/",
-    "start_url": "/",
+    "start_url": "/chat",
     "name": "chat",
     "short_name": "chat",
     "icons": [
