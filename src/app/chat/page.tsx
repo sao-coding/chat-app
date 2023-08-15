@@ -181,7 +181,7 @@ const ChatPage = () => {
                                 </button>
                             </div>
                             <div
-                                className='h-[90vh] overflow-y-scroll px-2 flex flex-col-reverse'
+                                className='h-[90vh] overflow-y-scroll px-2 flex flex-col-reverse overflow-x-hidden'
                                 ref={containerRef}
                                 onMouseDown={() => setIsMouseDown(true)}
                                 onMouseUp={() => setIsMouseDown(false)}

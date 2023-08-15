@@ -1,5 +1,6 @@
 import "./globals.css"
 import type { Metadata } from "next"
+import Toaster from "@/components/Toaster"
 import Container from "@/components/Container"
 
 export const metadata: Metadata = {
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <meta name='theme-color' content='#ffffff' />
             </head>
             <body>
+                <Toaster />
                 <Container>{children}</Container>
             </body>
         </html>

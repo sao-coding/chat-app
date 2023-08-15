@@ -14,6 +14,7 @@ import clsx from "clsx"
 import { db } from "@/lib/firebase/app"
 import { addDoc, collection, serverTimestamp } from "firebase/firestore"
 import { User } from "firebase/auth"
+import toast, { useToasterStore } from "react-hot-toast"
 // 卷軸 type
 
 const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
@@ -28,7 +29,15 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
         localStorage.getItem("anonymous") === "true" ? true : false
     )
     const messageRef = useRef<HTMLTextAreaElement | null>(null)
-    // const AnonymousRef = useRef(false)
+    const { toasts } = useToasterStore()
+    const TOAST_LIMIT = 2
+    // Enforce Limit
+    useEffect(() => {
+        toasts
+            .filter((t) => t.visible) // Only consider visible toasts
+            .filter((_, i) => i >= TOAST_LIMIT) // Is toast index over limit
+            .forEach((t) => toast.dismiss(t.id)) // Dismiss – Use toast.remove(t.id) removal without animation
+    }, [toasts])
 
     useEffect(() => {
         if ("serviceWorker" in navigator) {
@@ -45,7 +54,11 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
 
     const sendMessage = async () => {
         if (messageRef.current) {
-            if (messageRef.current.value === "") return
+            // 如果是一堆空白就不要送出
+            if (messageRef.current.value.trim() === "") {
+                toast.error("沒有內容")
+                return
+            }
             const { uid, displayName, photoURL, email } = user
             const data = {
                 // uid,
