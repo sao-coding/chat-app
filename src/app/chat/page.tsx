@@ -82,28 +82,33 @@ const ChatPage = () => {
                                     localStorage.getItem("notification") === "true"
                                 ) {
                                     navigator.serviceWorker.ready.then((registration) => {
-                                        registration.showNotification(messageData.author.username, {
-                                            body: messageData.content,
-                                            icon: messageData.author.avatar,
-                                            vibrate: [200, 100, 200, 100, 200, 100, 200],
-                                            tag: messageData.id,
-                                            renotify: true,
-                                            data: {
-                                                url: window.location.href,
-                                            },
-                                            actions: [
-                                                {
-                                                    action: "open",
-                                                    title: "開啟",
-                                                    icon: "/icons/icon-192x192.png",
+                                        registration.showNotification(
+                                            localStorage.getItem("anonymous") === "true"
+                                                ? "匿名"
+                                                : messageData.author.username,
+                                            {
+                                                body: messageData.content,
+                                                icon: messageData.author.avatar,
+                                                vibrate: [200, 100, 200, 100, 200, 100, 200],
+                                                tag: messageData.id,
+                                                renotify: true,
+                                                data: {
+                                                    url: window.location.href,
                                                 },
-                                                {
-                                                    action: "close",
-                                                    title: "關閉",
-                                                    icon: "/icons/icon-192x192.png",
-                                                },
-                                            ],
-                                        })
+                                                actions: [
+                                                    {
+                                                        action: "open",
+                                                        title: "開啟",
+                                                        icon: "/icons/icon-192x192.png",
+                                                    },
+                                                    {
+                                                        action: "close",
+                                                        title: "關閉",
+                                                        icon: "/icons/icon-192x192.png",
+                                                    },
+                                                ],
+                                            }
+                                        )
                                     })
                                 }
                             }
