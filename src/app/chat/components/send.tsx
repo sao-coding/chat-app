@@ -41,7 +41,6 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
             const docRef = doc(db, "messages", editMessage.id)
             const docSnap = await getDoc(docRef)
             if (docSnap.exists() && messageRef.current) {
-                console.log("Document data:", docSnap.data()?.content)
                 // 如果有換行符號
                 if (docSnap.data()?.content.includes("\n")) {
                     // changes
@@ -51,12 +50,10 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
                 }
                 messageRef.current.value = docSnap.data()?.content
             } else {
-                // doc.data() will be undefined in this case
-                console.log("No such document!")
+                toast.error("沒有這個訊息")
             }
         }
         if (editMessage.status) {
-            console.log("編輯模式" + editMessage.status)
             getMessage()
         }
     }, [editMessage])
@@ -92,7 +89,7 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
             }
             // 搜索 firebase 有沒有這個 id
 
-            if (editMessage.status) {
+            if (editMessage.status && editMessage.email === user.email) {
                 const docRef = doc(db, "messages", editMessage.id)
                 const docSnap = await getDoc(docRef)
                 if (docSnap.exists()) {
@@ -107,6 +104,7 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
                         setChanges(1)
                         setEditMessage({
                             id: "",
+                            email: "",
                             content: "",
                             status: false,
                         })
@@ -116,6 +114,13 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
                         toast.error("發送失敗")
                     }
                 }
+            } else {
+                setEditMessage({
+                    id: "",
+                    email: "",
+                    content: "",
+                    status: false,
+                })
             }
 
             if (!editMessage.status) {
