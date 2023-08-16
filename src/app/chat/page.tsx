@@ -20,6 +20,7 @@ import MessageCP from "@/app/chat/components/message"
 import SendCP from "@/app/chat/components/send"
 import LoadingCP from "@/app/chat/components/loading"
 import { Message } from "@/types"
+import { useEditMessageStore } from "@/store/edit"
 
 const ChatPage = () => {
     const [user, loading, error] = useAuthState(auth)
@@ -29,11 +30,12 @@ const ChatPage = () => {
     const { ref, inView } = useInView({
         delay: 800,
     })
-    const fristLoadRef = useRef(true)
+    const firstLoadRef = useRef(true)
     const containerRef = useRef<HTMLDivElement>(null)
     const [lastMessageId, setLastMessageId] = useState<string | null>(null)
     const router = useRouter()
     const [isMouseDown, setIsMouseDown] = useState(false)
+    const { editMessage } = useEditMessageStore()
 
     useEffect(() => {
         // 驗證是否登入
@@ -48,74 +50,74 @@ const ChatPage = () => {
             const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
                 setMessages((currentMessages) => {
                     const data: Message[] = []
-                    QuerySnapshot.forEach((doc) => {
+
+                    QuerySnapshot.docChanges().forEach((change) => {
+                        const doc = change.doc
                         const messageData = {
                             id: doc.id,
                             ...doc.data(),
                         } as Message
-                        // const sortedMessages = fetchedMessages.sort(
-                        //     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-                        // )
 
-                        const existingMessage = currentMessages.find(
-                            (message) => message.id === messageData.id
-                        )
+                        if (change.type === "added") {
+                            const existingMessage = currentMessages.find(
+                                (message) => message.id === messageData.id
+                            )
 
-                        if (!existingMessage) {
-                            data.push(messageData)
-                            // 通知訊息
-                            // console.log("fristLoad#", fristLoadRef.current)
-                            if (typeof window !== "undefined" && "Notification" in window) {
-                                console.log(
-                                    "Notification user email",
-                                    messageData.author.email,
-                                    user?.email
-                                )
-                                console.log(
-                                    "Notification permission",
-                                    localStorage.getItem("notification")
-                                )
-                                if (
-                                    Notification.permission === "granted" &&
-                                    messageData.author.email !== user?.email &&
-                                    !fristLoadRef.current &&
-                                    localStorage.getItem("notification") === "true"
-                                ) {
-                                    navigator.serviceWorker.ready.then((registration) => {
-                                        registration.showNotification(
-                                            localStorage.getItem("anonymous") === "true"
-                                                ? "匿名"
-                                                : messageData.author.username,
-                                            {
-                                                body: messageData.content,
-                                                icon: messageData.author.avatar,
-                                                vibrate: [200, 100, 200, 100, 200, 100, 200],
-                                                tag: messageData.id,
-                                                renotify: true,
-                                                data: {
-                                                    url: window.location.href,
-                                                },
-                                                actions: [
-                                                    {
-                                                        action: "open",
-                                                        title: "開啟",
-                                                        icon: "/icons/icon-192x192.png",
+                            if (!existingMessage) {
+                                data.push(messageData)
+                                // 通知訊息
+                                if (typeof window !== "undefined" && "Notification" in window) {
+                                    if (
+                                        Notification.permission === "granted" &&
+                                        messageData.author.email !== user?.email &&
+                                        !firstLoadRef.current &&
+                                        localStorage.getItem("notification") === "true"
+                                    ) {
+                                        navigator.serviceWorker.ready.then((registration) => {
+                                            registration.showNotification(
+                                                localStorage.getItem("anonymous") === "true"
+                                                    ? "匿名"
+                                                    : messageData.author.username,
+                                                {
+                                                    body: messageData.content,
+                                                    icon: messageData.author.avatar,
+                                                    vibrate: [200, 100, 200, 100, 200, 100, 200],
+                                                    tag: messageData.id,
+                                                    renotify: true,
+                                                    data: {
+                                                        url: window.location.href,
                                                     },
-                                                    {
-                                                        action: "close",
-                                                        title: "關閉",
-                                                        icon: "/icons/icon-192x192.png",
-                                                    },
-                                                ],
-                                            }
-                                        )
-                                    })
+                                                    actions: [
+                                                        {
+                                                            action: "open",
+                                                            title: "開啟",
+                                                            icon: "/icons/icon-192x192.png",
+                                                        },
+                                                        {
+                                                            action: "close",
+                                                            title: "關閉",
+                                                            icon: "/icons/icon-192x192.png",
+                                                        },
+                                                    ],
+                                                }
+                                            )
+                                        })
+                                    }
                                 }
+                            }
+                        } else if (change.type === "modified") {
+                            // 處理現有訊息的更新
+                            const existingIndex = currentMessages.findIndex(
+                                (message) => message.id === messageData.id
+                            )
+                            if (existingIndex !== -1) {
+                                // 更新現有訊息的內容
+                                currentMessages[existingIndex] = messageData
                             }
                         }
                     })
-                    fristLoadRef.current = false
-                    // console.log("FristLoad", fristLoadRef.current)
+
+                    firstLoadRef.current = false
                     setLastMessageId(data[data.length - 1]?.id ?? null)
                     return [...data, ...currentMessages]
                 })
@@ -207,7 +209,12 @@ const ChatPage = () => {
                                     ))}
                             </div>
 
-                            <div className='w-full h-[10vh] flex flex-col justify-end'>
+                            <div className='w-full h-[10vh] flex flex-col justify-end relative'>
+                                {editMessage.status && (
+                                    <div className='absolute -top-4 left-1 bg-orange-300 rounded-lg px-1'>
+                                        正在編輯訊息
+                                    </div>
+                                )}
                                 <div className='text-xs text-gray-400 text-center'>
                                     Powered by
                                     <Link href='https://github.com/sao-coding' target='_blank'>

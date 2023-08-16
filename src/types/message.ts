@@ -8,4 +8,6 @@ export type Message = {
     }
     content: string
     timestamp: string
+    edited_timestamp: string
+    deleted_timestamp: string
 }

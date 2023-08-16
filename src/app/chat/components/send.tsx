@@ -12,9 +12,10 @@ import * as Dialog from "@radix-ui/react-dialog"
 import * as Switch from "@radix-ui/react-switch"
 import clsx from "clsx"
 import { db } from "@/lib/firebase/app"
-import { addDoc, collection, serverTimestamp } from "firebase/firestore"
+import { addDoc, collection, doc, getDoc, setDoc } from "firebase/firestore"
 import { User } from "firebase/auth"
 import toast, { useToasterStore } from "react-hot-toast"
+import { useEditMessageStore } from "@/store/edit"
 // 卷軸 type
 
 const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
@@ -29,7 +30,37 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
         localStorage.getItem("anonymous") === "true" ? true : false
     )
     const messageRef = useRef<HTMLTextAreaElement | null>(null)
+    const { editMessage, setEditMessage } = useEditMessageStore()
     const { toasts } = useToasterStore()
+
+    useEffect(() => {
+        console.log("編輯模式")
+        const getMessage = async () => {
+            // 取得此id訊息
+            //
+            const docRef = doc(db, "messages", editMessage.id)
+            const docSnap = await getDoc(docRef)
+            if (docSnap.exists() && messageRef.current) {
+                console.log("Document data:", docSnap.data()?.content)
+                // 如果有換行符號
+                if (docSnap.data()?.content.includes("\n")) {
+                    // changes
+                    const count = docSnap.data()?.content.split("\n").length
+                    // 大於 3 就不要增加 三元運算子
+                    setChanges(count > 3 ? 3 : count)
+                }
+                messageRef.current.value = docSnap.data()?.content
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!")
+            }
+        }
+        if (editMessage.status) {
+            console.log("編輯模式" + editMessage.status)
+            getMessage()
+        }
+    }, [editMessage])
+
     const TOAST_LIMIT = 2
     // Enforce Limit
     useEffect(() => {
@@ -44,10 +75,10 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
             navigator.serviceWorker
                 .register("/sw.js")
                 .then(function (registration) {
-                    console.log("Registration successful, scope is:", registration.scope)
+                    toast.success("Service worker 註冊成功")
                 })
                 .catch(function (error) {
-                    console.log("Service worker registration failed, error:", error)
+                    toast.error("Service worker 註冊失敗")
                 })
         }
     }, [])
@@ -59,27 +90,57 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
                 toast.error("沒有內容")
                 return
             }
-            const { uid, displayName, photoURL, email } = user
-            const data = {
-                // uid,
-                author: {
-                    avatar: photoURL,
-                    username: displayName,
-                    email: email,
-                    anonymous: anonymous,
-                },
-                content: messageRef.current.value,
-                timestamp: new Date().toISOString(),
+            // 搜索 firebase 有沒有這個 id
+
+            if (editMessage.status) {
+                const docRef = doc(db, "messages", editMessage.id)
+                const docSnap = await getDoc(docRef)
+                if (docSnap.exists()) {
+                    // 如果有這個 id 就更新
+                    try {
+                        await setDoc(docRef, {
+                            ...docSnap.data(),
+                            content: messageRef.current.value,
+                            edited_timestamp: new Date().toISOString(),
+                        })
+                        messageRef.current.value = ""
+                        setChanges(1)
+                        setEditMessage({
+                            id: "",
+                            content: "",
+                            status: false,
+                        })
+                        console.log("送出編輯訊息", editMessage.id)
+                        return
+                    } catch (error) {
+                        toast.error("發送失敗")
+                    }
+                }
             }
 
-            try {
-                await addDoc(collection(db, "messages"), data)
-                messageRef.current.value = ""
-                setChanges(1)
-                // // 偵測捲軸自動捲到底部
-                // scroll.current.scrollIntoView({ behavior: "smooth" })
-            } catch (error) {
-                console.log(error)
+            if (!editMessage.status) {
+                const { uid, displayName, photoURL, email } = user
+                const data = {
+                    // uid,
+                    author: {
+                        avatar: photoURL,
+                        username: displayName,
+                        email: email,
+                        anonymous: anonymous,
+                    },
+                    content: messageRef.current.value,
+                    timestamp: new Date().toISOString(),
+                }
+
+                try {
+                    await addDoc(collection(db, "messages"), data)
+                    messageRef.current.value = ""
+                    setChanges(1)
+                    // // 偵測捲軸自動捲到底部
+                    // scroll.current.scrollIntoView({ behavior: "smooth" })
+                } catch (error) {
+                    toast.error("發送失敗")
+                }
             }
         }
     }
@@ -88,7 +149,7 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
         console.log("語音輸入")
         setVoiceLoading(true)
         if (!("webkitSpeechRecognition" in window)) {
-            alert("您的瀏覽器不支持語音輸入")
+            toast.error("您的瀏覽器不支持語音輸入")
             return
         }
         const recognition =
