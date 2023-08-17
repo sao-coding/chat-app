@@ -21,7 +21,7 @@ import MessageCP from "@/app/chat/components/message"
 import SendCP from "@/app/chat/components/send"
 import LoadingCP from "@/app/chat/components/loading"
 import { Message } from "@/types"
-import { useEditMessageStore } from "@/store/edit"
+import { useDeleteMessageStore } from "@/store/delete"
 
 const ChatPage = () => {
     const [user, loading, error] = useAuthState(auth)
@@ -36,7 +36,7 @@ const ChatPage = () => {
     const [lastMessageId, setLastMessageId] = useState<string | null>(null)
     const router = useRouter()
     const [isMouseDown, setIsMouseDown] = useState(false)
-    const { editMessage, setEditMessage } = useEditMessageStore()
+    const { deleteMessage } = useDeleteMessageStore()
 
     useEffect(() => {
         // 驗證是否登入
@@ -114,6 +114,14 @@ const ChatPage = () => {
                             if (existingIndex !== -1) {
                                 // 更新現有訊息的內容
                                 currentMessages[existingIndex] = messageData
+                            }
+                        } else if (change.type === "removed") {
+                            // 處理現有訊息的刪除
+                            const existingIndex = currentMessages.findIndex(
+                                (message) => message.id === messageData.id
+                            )
+                            if (existingIndex !== -1) {
+                                currentMessages.splice(existingIndex, 1)
                             }
                         }
                     })

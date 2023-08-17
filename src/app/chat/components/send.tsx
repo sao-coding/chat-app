@@ -72,7 +72,7 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
             navigator.serviceWorker
                 .register("/sw.js")
                 .then(function (registration) {
-                    toast.success("Service worker 註冊成功")
+                    console.log("Service worker 註冊成功", registration.scope)
                 })
                 .catch(function (error) {
                     toast.error("Service worker 註冊失敗")
