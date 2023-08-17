@@ -51,22 +51,26 @@ const Message = React.forwardRef<HTMLDivElement, { user: User; message: Message 
                         <Popover.Anchor className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2' />
                         <Popover.Portal>
                             <Popover.Content className='w-48 bg-slate-100 outline-none border rounded-2xl p-2'>
-                                <button
-                                    className='block outline-none text-center w-full hover:bg-slate-200 rounded-md'
-                                    onClick={() => {
-                                        setEditMessage({
-                                            id: message.id,
-                                            email: message.author?.email?.toLowerCase(),
-                                            content: message.content,
-                                            status: true,
-                                        })
-                                    }}
-                                >
-                                    編輯
-                                </button>
-                                <button className='block outline-none text-center w-full hover:bg-slate-200 rounded-md'>
-                                    刪除
-                                </button>
+                                <Popover.Close asChild>
+                                    <button
+                                        className='block outline-none text-center w-full hover:bg-slate-200 rounded-md'
+                                        onClick={() => {
+                                            setEditMessage({
+                                                id: message.id,
+                                                email: message.author?.email?.toLowerCase(),
+                                                content: message.content,
+                                                status: true,
+                                            })
+                                        }}
+                                    >
+                                        編輯
+                                    </button>
+                                </Popover.Close>
+                                <Popover.Close asChild>
+                                    <button className='block outline-none text-center w-full hover:bg-slate-200 rounded-md'>
+                                        刪除
+                                    </button>
+                                </Popover.Close>
                             </Popover.Content>
                         </Popover.Portal>
                     </Popover.Root>

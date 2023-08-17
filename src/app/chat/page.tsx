@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
+import { IconX } from "@tabler/icons-react"
 import { useAuthState, useSignOut } from "react-firebase-hooks/auth"
 import { auth } from "@/lib/firebase/app"
 import {
@@ -35,7 +36,7 @@ const ChatPage = () => {
     const [lastMessageId, setLastMessageId] = useState<string | null>(null)
     const router = useRouter()
     const [isMouseDown, setIsMouseDown] = useState(false)
-    const { editMessage } = useEditMessageStore()
+    const { editMessage, setEditMessage } = useEditMessageStore()
 
     useEffect(() => {
         // 驗證是否登入
@@ -209,12 +210,7 @@ const ChatPage = () => {
                                     ))}
                             </div>
 
-                            <div className='w-full h-[10vh] flex flex-col justify-end relative'>
-                                {editMessage.status && (
-                                    <div className='absolute -top-4 left-1 bg-orange-300 rounded-lg px-1'>
-                                        正在編輯訊息
-                                    </div>
-                                )}
+                            <div className='w-full h-[10vh] flex flex-col justify-end'>
                                 <div className='text-xs text-gray-400 text-center'>
                                     Powered by
                                     <Link href='https://github.com/sao-coding' target='_blank'>

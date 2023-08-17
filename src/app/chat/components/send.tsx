@@ -90,6 +90,10 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
             // 搜索 firebase 有沒有這個 id
 
             if (editMessage.status && editMessage.email === user.email) {
+                if (messageRef.current.value === editMessage.content) {
+                    toast.error("沒有變更")
+                    return
+                }
                 const docRef = doc(db, "messages", editMessage.id)
                 const docSnap = await getDoc(docRef)
                 if (docSnap.exists()) {
@@ -358,6 +362,25 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
                 </Dialog.Portal>
             </Dialog.Root>
             {/* </div> */}
+            {editMessage.status && (
+                <div className='absolute bottom-16 left-1 bg-orange-300 rounded-lg px-1 flex items-center'>
+                    <div>正在編輯訊息</div>
+                    <IconX
+                        className='ml-1 cursor-pointer'
+                        onClick={() => {
+                            if (messageRef.current) {
+                                setEditMessage({
+                                    id: "",
+                                    email: "",
+                                    content: "",
+                                    status: false,
+                                })
+                                messageRef.current.value = ""
+                            }
+                        }}
+                    />
+                </div>
+            )}
             <textarea
                 className={clsx(
                     "w-4/6 py-2 px-3 border h-full focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-transparent",
