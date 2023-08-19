@@ -315,16 +315,16 @@ const SendCP = ({ user, scroll }: { user: User; scroll: any }) => {
                 {replyMessage.content && (
                     <div className='bg-orange-200 rounded-lg px-1 flex items-center w-full justify-between'>
                         <div>
+                            {replyMessage.author?.anonymous ? (
+                                <div className='text-xs text-gray-600'>回覆 匿名</div>
+                            ) : (
+                                <div className='text-xs text-gray-600'>
+                                    回覆 {replyMessage.author?.username}
+                                </div>
+                            )}
                             {replyMessage.content.length > 20
                                 ? replyMessage.content.slice(0, 20) + "..."
                                 : replyMessage.content}
-                            {replyMessage.author?.anonymous ? (
-                                <div className='text-xs text-gray-600'>匿名</div>
-                            ) : (
-                                <div className='text-xs text-gray-600'>
-                                    {replyMessage.author?.username}
-                                </div>
-                            )}
                         </div>
                         <IconX
                             className='ml-1 cursor-pointer'
