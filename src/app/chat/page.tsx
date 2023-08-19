@@ -192,7 +192,7 @@ const ChatPage = () => {
                                 </button>
                             </div>
                             <div
-                                className='h-[90vh] overflow-y-scroll px-2 flex flex-col-reverse overflow-x-hidden'
+                                className='h-[90vh] overflow-y-scroll px-2 flex flex-col-reverse overflow-x-hidden max-[375px]:h-[85vh]'
                                 ref={containerRef}
                                 onMouseDown={() => setIsMouseDown(true)}
                                 onMouseUp={() => setIsMouseDown(false)}
@@ -218,17 +218,10 @@ const ChatPage = () => {
                                     ))}
                             </div>
 
-                            <div className='w-full h-[10vh] flex flex-col justify-end'>
-                                <div className='text-xs text-gray-400 text-center'>
-                                    Powered by
-                                    <Link href='https://github.com/sao-coding' target='_blank'>
-                                        {" 唯一 "}
-                                    </Link>
-                                    &copy; 2023
-                                </div>
-                                <div className='flex justify-between items-end bg-slate-100 py-2 px-4'>
-                                    <SendCP scroll={scroll} user={user} />
-                                </div>
+                            <div className='w-full h-[10vh] flex flex-col justify-end max-[375px]:h-[15vh]'>
+                                {/* <div className='flex justify-between items-end bg-slate-100 py-2 px-4'> */}
+                                <SendCP scroll={scroll} user={user} />
+                                {/* </div> */}
                             </div>
                         </div>
                     </div>

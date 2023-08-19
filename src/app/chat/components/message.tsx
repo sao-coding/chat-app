@@ -7,11 +7,13 @@ import { doc, getDoc, setDoc } from "firebase/firestore"
 import { Message } from "@/types"
 import dayjs from "dayjs"
 import * as Popover from "@radix-ui/react-popover"
+import { useReplyMessageStore } from "@/store/reply"
 import { useEditMessageStore } from "@/store/edit"
 import { useDeleteMessageStore } from "@/store/delete"
 
 const Message = React.forwardRef<HTMLDivElement, { user: User; message: Message }>(
     ({ user, message }, ref) => {
+        const { replyMessage, setReplyMessage } = useReplyMessageStore()
         const { setEditMessage } = useEditMessageStore()
         const { deleteMessage, setDeleteMessage } = useDeleteMessageStore()
 
@@ -67,17 +69,65 @@ const Message = React.forwardRef<HTMLDivElement, { user: User; message: Message 
                     </div>
                 </div>
                 {!message.deleted_timestamp && (
-                    <>
-                        {user.email === message.author?.email?.toLowerCase() ? (
-                            <Popover.Root modal={true}>
-                                <Popover.Trigger asChild>
-                                    <div className='border rounded-2xl bg-white px-2 py-1 max-w-xs break-words whitespace-pre-line'>
-                                        {message.content}
+                    <Popover.Root modal={true}>
+                        <Popover.Trigger asChild>
+                            <div className='border rounded-2xl bg-white px-2 py-1 max-w-xs break-words whitespace-pre-line'>
+                                {message?.message_reference?.status && (
+                                    <div className='flex'>
+                                        <div className='w-1 bg-slate-700 rounded-full mr-1' />
+                                        <div>
+                                            <div className='text-xs text-gray-400'>
+                                                回覆 {message?.message_reference?.author?.username}{" "}
+                                                的訊息
+                                            </div>
+                                            <div className=''>
+                                                {
+                                                    // 只顯示10個字 後續用...代替  刪除\n
+                                                    message?.message_reference?.content?.length > 10
+                                                        ? message?.message_reference?.content
+                                                              ?.slice(0, 10)
+                                                              .replace(/\n/g, "") + "..."
+                                                        : message?.message_reference?.content?.replace(
+                                                              /\n/g,
+                                                              ""
+                                                          )
+                                                }
+                                            </div>
+                                        </div>
                                     </div>
-                                </Popover.Trigger>
-                                <Popover.Anchor className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2' />
-                                <Popover.Portal>
-                                    <Popover.Content className='w-48 bg-slate-100 outline-none border rounded-2xl p-2'>
+                                )}
+                                {message.content}
+                            </div>
+                        </Popover.Trigger>
+                        <Popover.Anchor className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2' />
+                        <Popover.Portal>
+                            <Popover.Content className='w-48 bg-slate-100 outline-none border rounded-2xl p-2'>
+                                <Popover.Close asChild>
+                                    <button
+                                        className='block outline-none text-center w-full hover:bg-slate-200 rounded-md'
+                                        onClick={() => {
+                                            setReplyMessage({
+                                                id: message.id,
+                                                author: message.author,
+                                                content: message.content,
+                                                timestamp: message.timestamp,
+                                                edited_timestamp: message.edited_timestamp ?? "",
+                                                deleted_timestamp: message.deleted_timestamp ?? "",
+                                                status: true,
+                                            })
+                                            setEditMessage({
+                                                id: "",
+                                                email: "",
+                                                content: "",
+                                                status: false,
+                                            })
+                                        }}
+                                    >
+                                        回覆
+                                    </button>
+                                </Popover.Close>
+                                {user.email === message.author?.email?.toLowerCase() && (
+                                    <>
                                         <Popover.Close asChild>
                                             <button
                                                 className='block outline-none text-center w-full hover:bg-slate-200 rounded-md'
@@ -88,6 +138,20 @@ const Message = React.forwardRef<HTMLDivElement, { user: User; message: Message 
                                                         content: message.content,
                                                         status: true,
                                                     })
+                                                    setReplyMessage({
+                                                        id: "",
+                                                        author: {
+                                                            email: "",
+                                                            username: "",
+                                                            avatar: "",
+                                                            anonymous: false,
+                                                        },
+                                                        content: "",
+                                                        timestamp: "",
+                                                        edited_timestamp: "",
+                                                        deleted_timestamp: "",
+                                                        status: false,
+                                                    })
                                                 }}
                                             >
                                                 編輯
@@ -96,7 +160,7 @@ const Message = React.forwardRef<HTMLDivElement, { user: User; message: Message 
                                         <Popover.Close asChild>
                                             <button
                                                 className='block outline-none text-center w-full hover:bg-slate-200 rounded-md'
-                                                onClick={async () => {
+                                                onClick={() => {
                                                     setDeleteMessage({
                                                         id: message.id,
                                                         email: message.author?.email?.toLowerCase(),
@@ -107,15 +171,11 @@ const Message = React.forwardRef<HTMLDivElement, { user: User; message: Message 
                                                 刪除
                                             </button>
                                         </Popover.Close>
-                                    </Popover.Content>
-                                </Popover.Portal>
-                            </Popover.Root>
-                        ) : (
-                            <div className='border rounded-2xl bg-white px-2 py-1 max-w-xs break-words whitespace-pre-line'>
-                                {message.content}
-                            </div>
-                        )}
-                    </>
+                                    </>
+                                )}
+                            </Popover.Content>
+                        </Popover.Portal>
+                    </Popover.Root>
                 )}
                 {message.deleted_timestamp && (
                     <div className='text-xs text-red-500'>已刪除訊息</div>
